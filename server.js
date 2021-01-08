@@ -1,45 +1,46 @@
-const { Nuxt, Builder } = require('nuxt')
-const bodyParser = require('body-parser')
+// Nuxt
+const { loadNuxt, build } = require('nuxt')
+
+// Express
+const express = require('express')
+const app = express()
+
+const isDev = process.env.NODE_ENV !== 'production'
+const port = process.env.PORT || 3000
+
+// Session
 const session = require('express-session')
-const app = require('express')()
-
-// Body parser, to access `req.body`
-app.use(bodyParser.json())
-
-// Sessions to create `req.session`
 app.use(
-  session({
-    secret: 'super-secret-key',
-    resave: false,
-    saveUninitialized: false,
-    cookie: { maxAge: 60000 },
-  })
+    session({
+        secret: 'change this',
+        resave: true,
+        saveUninitialized: true,
+        cookie: {
+            // Use secure only in production
+            secure: !isDev,
+        },
+    })
 )
 
-// POST `/api/login` to log in the user and add him to the `req.session.authUser`
-app.post('/api/login', function (req, res) {
-  if (req.body.username === 'demo' && req.body.password === 'demo') {
-    req.session.authUser = { username: 'demo' }
-    return res.json({ username: 'demo' })
-  }
-  res.status(401).json({ error: 'Bad credentials' })
-})
+async function start() {
+    const nuxt = await loadNuxt(isDev ? 'dev' : 'start')
 
-// POST `/api/logout` to log out the user and remove it from the `req.session`
-app.post('/api/logout', function (req, res) {
-  delete req.session.authUser
-  res.json({ ok: true })
-})
+    const bodyParser = require('body-parser')
+    app.use(bodyParser.json())
 
-// We instantiate Nuxt.js with the options
-const isProd = process.env.NODE_ENV === 'production'
-const nuxt = new Nuxt({ dev: !isProd })
-// No build in production
-if (!isProd) {
-  const builder = new Builder(nuxt)
-  builder.build()
+    const auth = require('./serverComponents/auth')
+    app.use('/auth', auth)
+
+    // Render every route with Nuxt.js
+    app.use(nuxt.render)
+
+    // Build only in dev mode with hot-reloading
+    if (isDev) build(nuxt)
+
+    // Listen the server
+    app.listen(port, '0.0.0.0')
+    // eslint-disable-next-line no-console
+    console.log('Server listening on `localhost:' + port + '`.')
 }
-app.use(nuxt.render)
-app.listen(3000)
 
-console.log('Server is listening on http://localhost:3000')
+start()

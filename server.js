@@ -8,22 +8,18 @@ const app = express()
 const isDev = process.env.NODE_ENV !== 'production'
 const port = process.env.PORT || 3000
 
-// Session
-const session = require('express-session')
-app.use(
-    session({
-        secret: 'change this',
-        resave: true,
-        saveUninitialized: true,
-        cookie: {
-            // Use secure only in production
-            secure: !isDev,
-        },
-    })
-)
-
 async function start() {
     const nuxt = await loadNuxt(isDev ? 'dev' : 'start')
+
+    // Session
+    const session = require('express-session')
+    app.use(
+        session({
+            secret: 'change this',
+            resave: false,
+            saveUninitialized: true,
+        })
+    )
 
     const bodyParser = require('body-parser')
     app.use(bodyParser.json())

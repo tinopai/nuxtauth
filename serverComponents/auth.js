@@ -16,4 +16,12 @@ router.post('/', (_, res) => {
     res.status(501).send(null)
 })
 
+// Destroy session
+router.post('/destroy', (req, res) => {
+    req.session.authUser = null
+    return res.send(200).json({
+        success: true,
+    })
+})
+
 module.exports = router

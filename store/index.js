@@ -49,16 +49,17 @@ const store = () =>
                     })
                     .then((authUser) => {
                         commit('SET_USER', authUser)
-                        location.href = '/dashboard'
+                        this.$router.push('/dashboard')
                     })
             },
             logout({ commit }) {
-                return fetch('http://0.0.0.0/auth/destroy', {
+                return fetch('http://localhost:3000/auth/destroy', {
                     // Send the client cookies to the server
                     credentials: 'same-origin',
                     method: 'POST',
                 }).then(() => {
                     commit('SET_USER', null)
+                    this.$router.push('/login')
                 })
             },
         },

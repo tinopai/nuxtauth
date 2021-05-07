@@ -2,13 +2,21 @@
 const express = require('express')
 const router = express.Router()
 
+const mongo = require('./../utility/mongo.js').users
+mongo.find({ username: 'tino' }).then((res) => {
+    console.log(`[+] Response: `, res)
+})
+
 // Log in
-router.post('/', (req, res) => {
-    if (req.body.username === 'demo' && req.body.password === 'demo') {
-        req.session.authUser = { username: 'demo' }
-        return res.json({ username: 'demo' })
+router.post('/', async (req, res) => {
+    const user = await mongo.findOne({ username: req.body.username })
+
+    if (user?.password === req.body?.password) {
+        delete user.password // Remove user.password so the hashed password doesnt show up on client
+        req.session.authUser = user
+        return res.json(user)
     }
-    res.status(401).json({ error: 'Bad credentials' })
+    return res.json({ error: 'Bad credentials' })
 })
 
 // Sign up

@@ -8,6 +8,9 @@ const app = express()
 const isDev = process.env.NODE_ENV !== 'production'
 const port = process.env.PORT || 3000
 
+const dotenv = require('dotenv')
+dotenv.config()
+
 async function start() {
     const nuxt = await loadNuxt(isDev ? 'dev' : 'start')
 

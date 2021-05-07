@@ -48,8 +48,11 @@ const store = () =>
                         }
                     })
                     .then((authUser) => {
-                        commit('SET_USER', authUser)
-                        this.$router.push('/dashboard')
+                        console.log(authUser)
+                        if (authUser._id) {
+                            commit('SET_USER', authUser)
+                            this.$router.push('/dashboard')
+                        } else this.$router.push(`/login?e=${authUser.error}`)
                     })
             },
             logout({ commit }) {
